@@ -2,36 +2,90 @@ import javax.swing.JFrame;
 
 public class Main {
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws InterruptedException
 	{
+		int x,y;
 		UserInterface ui = new UserInterface();
         ui.display();
         Thread UserInterfaceThread = new Thread(ui);
         UserInterfaceThread.start();
-        
+        //UserInterfaceThread.join();
+        System.out.println("am iesit "+ui.gameMode);
         AI ai = new AI();
-        boolean albe = ai.faceMiscare(0);
-        boolean negre = false;
-        AI.alegeMiscareAI(AI.TablaAI,4,Integer.MIN_VALUE,Integer.MAX_VALUE,1);
-        System.out.println("Miscarea aleasa este "+AI.miscareAleasa);
-        AI.doMiscare(AI.miscareAleasa,UserInterface.TablaUI);
-        int x = Character.getNumericValue(AI.miscareAleasa.charAt(2));
-        int y = Character.getNumericValue(AI.miscareAleasa.charAt(3));
-        ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
-        AI.randMiscare = 0;
-        negre = true;
-        ui.jf.repaint();
-        ui.TablaUI[0][6].ana();
-        while(albe && negre)
+        int albe;
+        int negre;
+        
+        
+        
+      //(1-pvp+internet, 2-pvp+samepc, 3-pvc+Alb, 4-pvc+Negru)
+        while(ui.gameMode == 0 || ui.totulAles == false)
         {
-        	albe = ai.faceMiscare(0);
-        	AI.alegeMiscareAI(AI.TablaAI,4,Integer.MIN_VALUE,Integer.MAX_VALUE,1);
-            AI.doMiscare(AI.miscareAleasa,UserInterface.TablaUI);
-            x = Character.getNumericValue(AI.miscareAleasa.charAt(2));
-            y = Character.getNumericValue(AI.miscareAleasa.charAt(3));
-            ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
-            ui.jf.repaint();
-           
+        	System.out.println("inca nu s-a ales modul de joc");
+        }
+        
+        
+        
+        System.out.println("S-a ales modul: " + ui.gameMode);
+        if(ui.gameMode == 2)
+        {
+        	System.out.println("Game initializing...");
+        	System.out.println("White - Player1");
+        	System.out.println("Black  - Player2");
+        	ai.samePC();
+        	System.out.println("Game ended");
+    	}
+        else if(ui.gameMode==1)
+        {
+                String move;
+        	albe = 0;
+                negre = 0;
+                if(ui.SV.ss!=null){
+                    albe = ai.playerFaceMiscare(0);
+                    ui.SV.sendMove(ai.istoriaMiscarilor.get(ai.istoriaMiscarilor.size()-1));
+                }else{
+                    
+                }
+        	while(albe == 0 && negre == 0){
+        		if(ui.SV.ss != null){
+        			System.out.println("server");
+                                move = ui.SV.getMove();
+                                AI.doMiscare(move,UserInterface.TablaUI);
+                                x = Character.getNumericValue(move.charAt(2));
+        			y = Character.getNumericValue(move.charAt(3));
+        			ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
+                                ui.jf.repaint();
+        			albe = ai.playerFaceMiscare(0);
+        			ui.SV.sendMove(ai.istoriaMiscarilor.get(ai.istoriaMiscarilor.size()-1));
+        		}else {
+                                System.out.println("socket");
+                                move = ui.SV.getMove();
+        			AI.doMiscare(move,UserInterface.TablaUI);
+                                x = Character.getNumericValue(move.charAt(2));
+        			y = Character.getNumericValue(move.charAt(3));
+        			ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
+                                ui.jf.repaint();
+        			negre = ai.playerFaceMiscare(0);
+                                System.out.println("cica s-a facut negrele");
+        			ui.SV.sendMove(ai.istoriaMiscarilor.get(ai.istoriaMiscarilor.size()-1));
+                                x = Character.getNumericValue(move.charAt(2));
+        			y = Character.getNumericValue(move.charAt(3));
+        			ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
+                                ui.jf.repaint();
+        		}        		
+        	}
+    	}
+        else if(ui.gameMode == 3)
+        {
+        	//JUCAM CONTRA CALCULATORULUI CU PIESE ALBE
+            ai.whiteAgainstComputer(ui);
+            
+            
+    	}
+        else if(ui.gameMode == 4 && ui.totulAles == true)
+        {
+        	System.out.println("incepem joaca");
+        	//JUCAM CONTRA CALCULATORULUI CU PIESE NEGRE
+        	ai.blackAgainstComputer(ui);
         }
 	}
 }

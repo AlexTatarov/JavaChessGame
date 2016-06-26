@@ -3,51 +3,79 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.JOptionPane;
+import javax.swing.plaf.OptionPaneUI;
+
 public class Server
 {
-    public static void main(String[] sir) throws IOException
-    {
-        ServerSocket ss = null;
-        Socket cs = null;
-        
-        Scanner sc = new Scanner(System.in);
-        
-        System.out.print("Portul: ");
-        
-		//instantiem server-ul
-		ss = new ServerSocket(sc.nextInt());
-        sc.nextLine();
-        
-        System.out.println("Serverul a pornit!");
+	ServerSocket ss = null;
+	Socket cs = null;
+	DataInputStream dis = null;
+    DataOutputStream dos =null;
+    
+    
+	public Server(){
+		Socket cs = null;
+		try {
+			ss = new ServerSocket(2005);
+		} catch (IOException e) {
+			System.out.println(" ERROARE LA ServerSOCKET"+ e.getMessage());
+			try {
+				cs = new Socket("localhost", 2005);
+				
+			} catch (UnknownHostException ee) {
+				System.out.println(" ERROARE LA hostSOCKET"+ e.getMessage());
+				e.printStackTrace();
+			} catch (IOException ee) {
+				System.out.println(" ERROARE LA ioSOCKET"+ e.getMessage());
+				e.printStackTrace();}
+		}
 		
-		//server-ul asteapta un client sa se conecteze
-        cs = ss.accept();
-        
-		//server-ul preia fluxurile de la/catre client
-        DataInputStream dis = new DataInputStream(cs.getInputStream());
-        DataOutputStream dos = new DataOutputStream(cs.getOutputStream());
-
-		//citim linia de text transmisa de catre client si o afisam, 
-		//dupa care citim o linie si o transmitem clientului
-		//chat-ul se inchide cand clientul transmite cuvantul STOP
-        while(true)
-        {
-            String linie = dis.readUTF();
-            
-            System.out.println("Mesaj receptionat: " + linie);
-            
-            if (linie.equals("STOP"))
-                break;
-
-            System.out.print("Mesaj de trimis: ");
-            linie = sc.nextLine();
-            dos.writeUTF(linie);
-        }
-        
-        dis.close();
-        dos.close();
-        cs.close();
-        ss.close();
+        if(ss!=null){
+            JOptionPane.showOptionDialog(null, "Se asteapta un client",
+                    "Info", JOptionPane.DEFAULT_OPTION,
+                    JOptionPane.INFORMATION_MESSAGE, null, new Object[] {},
+                    null);
+            try {
+				cs = ss.accept();
+			} catch (IOException e) {
+				System.out.println(" ERROARE LA SOCKET"+ e.getMessage());
+				e.printStackTrace();
+			}
+        } 
+        try {
+			dis = new DataInputStream(cs.getInputStream());
+		} catch (IOException e) {
+			System.out.println(" ERROARE LA disSOCKET"+ e.getMessage());
+			e.printStackTrace();
+		}
+        try {
+			dos = new DataOutputStream(cs.getOutputStream());
+		} catch (IOException e) {
+			System.out.println(" ERROARE LA dosSOCKET"+ e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
+	
+	public void sendMove(String move){
+		try {
+                    System.out.println("trimit "+move);
+			dos.writeUTF(move);
+		} catch (IOException e) {
+			System.out.println("Erroare la trimitere mesaj");
+		}		
+    }
+	
+	public String getMove(){
+			try {
+                            
+				String move = dis.readUTF();
+                                System.out.println("primesc "+move);
+                                return move;
+			} catch (IOException e) {
+				System.out.println("Erroare la primire mesaj");
+				return "0000";
+			}
     }
 }
-

@@ -13,13 +13,191 @@ public class AI {
 	static String miscareAleasa;
 	static Piesa TablaAI[][] = new Piesa[8][8];
 	static int nivelDificultate;
-	static int culoareCalculator = 0;
-	static int culoareJucator = 1;
+	static int culoareCalculator;
+	static int culoareJucator;
 	
 	
-	
+	void samePC()
+	{
+		boolean albe,negru;
+		int result = 0;
+		while(result == 0)
+		{
+			result = playerFaceMiscare(randMiscare);
+		}
+		//functie care ar afisa invingatorul(randMiscare e culoarea calculatorului);
+		//0 = albe 1 = negre 2 = remiza;
+	}
+	void blackAgainstComputer(UserInterface ui)
+	{
+		int result = 0;
+		while(result == 0)
+		{
+			
+			
+			result = calculatorFaceMiscare(ui);
+			if(result == 1)
+			{
+				System.out.println("Remiza.");
+				break;
+			}
+			if(result == 2)
+			{
+				System.out.println("Sah. Mat. Calculatorul a castigat.");
+				break;
+			}
+			
+			result = playerFaceMiscare(culoareJucator);
+			if(result == 1)
+			{
+				System.out.println("Remiza.");
+				break;
+			}
+			if(result == 2)
+			{
+				System.out.println("Sah.Mat. Jucatorul a castigat.");
+				break;
+			}
+			
+			UserInterface.jf.repaint();
+		}
+	}
+	void whiteAgainstComputer(UserInterface ui)
+	{
+		int result = 0;
+		while(result == 0)
+		{
+			System.out.println("Inainte:");
+			for(int i = 0; i<8; i++)
+			{
+				for(int j=0; j<8; j++)
+				{
+					if(TablaAI[i][j] != null)
+					{
+						System.out.print(TablaAI[i][j].cod+" ");
+					}
+					else
+					{
+						System.out.print("n ");
+					}
+				}
+				System.out.println();
+			}
+			result = playerFaceMiscare(culoareJucator);
+			if(result == 1)
+			{
+				System.out.println("Remiza.");
+				break;
+			}
+			if(result == 2)
+			{
+				System.out.println("Sah. Mat. Calculatorul a castigat.");
+				break;
+			}
+			
+			result = calculatorFaceMiscare(ui);
+			if(result == 1)
+			{
+				System.out.println("Remiza.");
+				break;
+			}
+			if(result == 2)
+			{
+				System.out.println("Sah.Mat. Jucatorul a castigat.");
+				break;
+			}
+			System.out.println("Dupa:");
+			for(int i = 0; i<8; i++)
+			{
+				for(int j=0; j<8; j++)
+				{
+					if(TablaAI[i][j] != null)
+					{
+						System.out.print(TablaAI[i][j].cod+" ");
+					}
+					else
+					{
+						System.out.print("n ");
+					}
+				}
+				System.out.println();
+			}
+			UserInterface.jf.repaint();
+		}
+	}
 	//alfa = valoarea maxima
 	//beta = valoarea minima
+	//CALCULATORUL FACE O MISCARE
+	int calculatorFaceMiscare(UserInterface ui)
+	{
+		System.out.println("Se face miscarea: ");
+		sincronizareTable();
+		int result = alegeMiscareAI(TablaAI,nivelDificultate,Integer.MIN_VALUE,Integer.MAX_VALUE,culoareCalculator);
+		if(result > 0)
+		{
+			if(result == 1)
+			{
+				System.out.println("Remiza.");
+				return 1;
+			}
+			else if(result == 2)
+			{
+				//System.out.println("Jucatorul a castigat.");
+				return 2;
+			}
+		}
+		System.out.print(miscareAleasa);
+		doMiscareAleasa(miscareAleasa,ui.TablaUI);
+		doMiscareAleasa(miscareAleasa,TablaAI);
+		randMiscare = 1 - randMiscare;
+		UserInterface.jf.repaint();
+		return 0;
+	}
+	
+	static void doMiscareAleasa(String miscare,Piesa[][] Tabla)
+	{
+		int cul;
+		int x_initial,x_final,y_initial,y_final;
+		x_initial = Character.getNumericValue(miscare.charAt(0));
+		y_initial = Character.getNumericValue(miscare.charAt(1));
+		x_final = Character.getNumericValue(miscare.charAt(2));
+		y_final = Character.getNumericValue(miscare.charAt(3));
+		cul = Tabla[x_initial][y_initial].culoare;
+		//daca este rege
+		if(Tabla[x_initial][y_initial].cod == 9)
+		{
+			if(cul == 0)
+			{
+				xRegeAlb = x_final;
+				yRegeAlb = y_final;
+			}
+			else
+			{
+				xRegeNegru = x_final;
+				yRegeNegru = y_final;
+			}
+		}
+		//daca este pion
+		else if(Tabla[x_initial][y_initial].cod == 1)
+		{
+			Tabla[x_initial][y_initial].stare = 2;
+		}
+		if(miscare.charAt(4) != ' ')
+		{
+			if(cul == 0)
+			{
+				pieseBatuteNegre.add(Tabla[x_final][y_final]);
+			}
+			else
+			{
+				pieseBatuteAlbe.add(Tabla[x_final][y_final]);
+			}
+		}
+		Tabla[x_initial][y_initial].imagePosition.setLocation(x_final*UserInterface.sc+20, y_final*UserInterface.sc+20);
+		Tabla[x_final][y_final] = Tabla[x_initial][y_initial];
+		Tabla[x_initial][y_initial] = null;
+		
+	}
 	//SE ALEGE MISCAREA PENTRU CALCULATOR, DECI CALCULATORUL VA FI MAXIMAZING PLAYER
 	static int alegeMiscareAI(Piesa[][] Tabla,int adancime, int alfa, int beta, int cul)
 	{
@@ -35,8 +213,8 @@ public class AI {
 		
 		//DACA ESTE NIVEL TERMINAL SAU DACA NU MAI ARE FII
 		if(adancime == 0 || 
-				(cul == culoareCalculator && miscariPosibileCalculator.size() == 0) || 
-				(cul == culoareJucator && miscariPosibileJucator.size() == 0))
+				(cul == culoareCalculator && miscariPosibileCalculator.size() == 0 && adancime != nivelDificultate) || 
+				(cul == culoareJucator && miscariPosibileJucator.size() == 0 && adancime != nivelDificultate))
 		{
 			int val = Rating.evaluare(Tabla,culoareCalculator,miscariPosibileCalculator,miscariPosibileJucator,nivelDificultate + 1 - adancime) 
 					- Rating.evaluare(Tabla,culoareJucator,miscariPosibileJucator,miscariPosibileCalculator,nivelDificultate + 1 - adancime);
@@ -45,22 +223,45 @@ public class AI {
 			return val;
 		}
 		//DACA ESTE CALCULATORUL ATUNCI SIMULAM SI UPDATE-AM alfa
-		if(cul ==culoareCalculator)
+		if(cul == culoareCalculator)
 		{
 			valoare = Integer.MIN_VALUE;
+			if(miscariPosibileCalculator.size() == 0 && adancime == nivelDificultate)
+			{
+				miscareAleasa = null;
+				if(culoareCalculator == 0)
+				{
+					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
+					{
+						return 1;
+					}
+					else
+					{
+						return 2;
+					}
+				}
+				else if(culoareCalculator == 1)
+				{
+					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
+					{
+						return 1;
+					}
+					else
+					{
+						return 2;
+					}
+				}
+			}
 			for(int i=0; i<miscariPosibileCalculator.size(); ++i)
 			{
-				
 				doMiscare(miscariPosibileCalculator.get(i),Tabla);
 				valoare = Math.max(valoare,alegeMiscareAI(Tabla,adancime-1,alfa,beta,culoareJucator));
 				if(adancime == nivelDificultate)
 				{
-					
 					if(valoare > valoareMaxima)
 					{
 						valoareMaxima = valoare;
 						miscareAleasa = miscariPosibileCalculator.get(i);
-						
 					}
 				}
 				undoMiscare(miscariPosibileCalculator.get(i),Tabla);
@@ -70,10 +271,10 @@ public class AI {
 					//BETA CUT-OFF
 					break;
 				}
-				
 			}
 			return valoare;
 		}
+		//IN CAZ CONTRAT UPDATE-UM beta
 		else
 		{
 			valoare = Integer.MAX_VALUE;
@@ -177,7 +378,8 @@ public class AI {
 	}
 	
 	//JUCATORUL DE CULOAREA cul FACE O MISCARE
-	boolean faceMiscare(int cul)
+	//0 = miscare facuta, 1 = remiza(nici o miscare posibile dar nu e sah), 2 = mat(nici o miscare posibila + sah);
+	int playerFaceMiscare(int cul)
 	{
 		UserInterface.miscareFacuta = false;
 		sincronizareTable();
@@ -217,36 +419,27 @@ public class AI {
 				if(regeNeAtacat(xRegeAlb,yRegeAlb,TablaAI))
 				{
 					System.out.println("Remiza");
+					return 1;
 				}
 				else
 				{
-					System.out.println("Sah. Mat.");
+					System.out.println("Sah. Mat. Calculatorul a castigat");
+					return 2;
 				}
-				return false;
 			}
 			else
 			{
-				/*
-				 * ultima schimbare
-				 * System.out.println("Miscarile posibile sunt:");
-				for(int i=0; i<miscariPosibileAlbe.size(); i++)
-				{
-					System.out.println(miscariPosibileAlbe.get(i)+".");
-				}
-				*/
 				while(UserInterface.miscareFacuta == false)
 				{
-					try {
+					try 
+					{
 						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						
+					} 
+					catch (InterruptedException e) 
+					{
 						e.printStackTrace();
 					}
-					//System.out.println("Sunt in while");
 				}
-				
-				//System.out.println("S-a facut miscarea alba");
-
 			}
 		}
 		if(cul == 1)
@@ -257,57 +450,34 @@ public class AI {
 				if(regeNeAtacat(xRegeNegru,yRegeNegru,TablaAI))
 				{
 					System.out.println("Remiza");
-					for(int i=0; i<istoriaMiscarilor.size(); i++)
-					{
-						System.out.println(istoriaMiscarilor.get(i)+".");
-					}
+					return 1;
 				}
 				else
 				{
-					System.out.println("Sah. Mat.");
-					for(int i=0; i<istoriaMiscarilor.size(); i++)
-					{
-						System.out.println(istoriaMiscarilor.get(i)+".");
-					}
-						
+					System.out.println("Sah. Mat. Calculatorul a castigat");
+					return 2;
 				}
-				return false;
 			}
 			else
 			{
-				/*ultima schimabre
-				System.out.println("Miscarile posibile sunt:");
-				for(int i=0; i<miscariPosibileNegre.size(); i++)
-				{
-					System.out.println(miscariPosibileNegre.get(i)+".");
-				}
-				*/
 				while(UserInterface.miscareFacuta == false)
 				{
-					try {
+					try 
+					{
 						Thread.sleep(100);
-					} catch (InterruptedException e) {
-						
+					} 
+					catch (InterruptedException e) 
+					{	
 						e.printStackTrace();
 					}
-					//System.out.println("Sunt in while");
 				} 
-				//System.out.println("S-a facut miscarea neagra");
 			}
-			
-			/*
-			for(int i=0; i<miscariPosibileNegre.size(); i++)
-			{
-				System.out.println(miscariPosibileNegre.get(i));
-			}
-			*/
 		}
-		//repaint();
 		miscariPosibileAlbe.clear();
 		miscariPosibileNegre.clear();
 		UserInterface.miscareFacuta = false;
 		randMiscare = 1 - randMiscare;
-		return true;
+		return 0;
 	}
 	
 	//SE FACE MISCAREA DETERMINATA DE miscare, PE TABLA Tabla
@@ -1039,105 +1209,117 @@ public class AI {
 		String miscare = new String();
 		int directie = 0;
 		int cul = Tabla[r][c].culoare;
-		if(Tabla[r][c].culoare == 0)//este alb
+		//AVEM PIESA ALBA
+		if(cul == 0)
 		{
 			directie = -1;
+			int raux = r + directie;
+			int caux = c;
+			if(raux > -1)
+			{
+				//UN PAS INAINTE
+				if(Tabla[raux][c] == null)
+				{
+					miscare = ""+r+c+raux+caux+" ";
+					doMiscare(miscare,Tabla);
+					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
+					{
+						miscariPosibile.add(miscare);
+					}
+					undoMiscare(miscare,Tabla);
+				}
+				//ATAC DREPTA
+				caux = c + 1;
+				if(caux < 8 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 1 && Tabla[raux][caux].cod != 9)
+				{
+					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					doMiscare(miscare,Tabla);
+					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
+					{
+						miscariPosibile.add(miscare);
+					}
+					undoMiscare(miscare,Tabla);
+				}
+				//ATAC STANGA
+				caux = c - 1;
+				if(caux > -1 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 1 && Tabla[raux][caux].cod != 9)
+				{
+					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					doMiscare(miscare,Tabla);
+					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
+					{
+						miscariPosibile.add(miscare);
+					}
+					undoMiscare(miscare,Tabla);
+				}
+				//SALT INITIAL DE 2 PASI
+				if(Tabla[r][c].stare == 1 && Tabla[r+directie*2][c] == null)
+				{
+					miscare = ""+r+c+(r+directie*2)+c+" ";
+					doMiscare(miscare,Tabla);
+					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
+					{
+						miscariPosibile.add(miscare);
+					}
+					undoMiscare(miscare,Tabla);
+				}
+			}
 		}
-		else//este negru
+		//AVEM PIESA NEAGRA
+		else
 		{
 			directie = 1;
-		}
-		int raux = r + directie;
-		int caux = c;
-		if(r+directie < 8 && r+directie > -1)
-		{
-			if(Tabla[r+directie][c] == null)
+			int raux = r + directie;
+			int caux = c;
+			if(raux < 8)
 			{
-				miscare = ""+r+c+raux+caux+" ";
-				doMiscare(miscare,Tabla);
-				if(cul == 0)
+				//UN PAS INAINTE
+				if(Tabla[raux][caux] == null)
 				{
-					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
-					{
-						miscariPosibile.add(miscare);
-					}
-				}
-				else
-				{
+					miscare = ""+r+c+raux+caux+" ";
+					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
 					{
 						miscariPosibile.add(miscare);
 					}
+					undoMiscare(miscare,Tabla);
 				}
-				undoMiscare(miscare,Tabla);
-			}
-		}
-		
-		if(caux+1 < 8 && Tabla[raux][caux+1]!= null && Tabla[raux][caux+1].cod != 9)
-		{
-			if(Tabla[r][c].culoare != Tabla[raux][caux+1].culoare)
-			{
-				miscare = ""+r+c+raux+(caux+1)+Tabla[raux][caux+1].cod;
-				doMiscare(miscare,Tabla);
-				if(cul == 0)
+				//ATAC DREAPTA
+				caux = c + 1;
+				if(caux < 8 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 0 && Tabla[raux][caux].cod != 9)
 				{
-					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
-					{
-						miscariPosibile.add(miscare);
-					}
-				}
-				else
-				{
+					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
 					{
 						miscariPosibile.add(miscare);
 					}
+					undoMiscare(miscare,Tabla);
 				}
-				undoMiscare(miscare,Tabla);
-			}
-		}
-		if(caux-1>-1 && Tabla[raux][caux-1]!=null && Tabla[raux][caux-1].cod != 9)
-		{
-			if(Tabla[r][c].culoare != Tabla[raux][caux-1].culoare)
-			{
-				miscare = ""+r+c+raux+(caux-1)+Tabla[raux][caux-1].cod;
-				doMiscare(miscare,Tabla);
-				if(cul == 0)
+				//ATAC STANGA
+				caux = c - 1;
+				if(caux > -1 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 0 && Tabla[raux][caux].cod != 9)
 				{
-					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
-					{
-						miscariPosibile.add(miscare);
-					}
-				}
-				else
-				{
+					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
 					{
 						miscariPosibile.add(miscare);
 					}
+					undoMiscare(miscare,Tabla);
 				}
-				undoMiscare(miscare,Tabla);
-			}
-		}
-		if(Tabla[r][c].stare == 1 && Tabla[r+directie*2][c] == null)
-		{
-			miscare = ""+r+c+(r+directie*2)+c+" ";
-			doMiscare(miscare,Tabla);
-			if(cul == 0)
-			{
-				if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
+				//SALT INITIAL DE 2 PASI
+				if(Tabla[r][c].stare == 1 && Tabla[r+directie*2][c] == null)
 				{
-					miscariPosibile.add(miscare);
+					miscare = ""+r+c+(r+directie*2)+c+" ";
+					doMiscare(miscare,Tabla);
+					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
+					{
+						miscariPosibile.add(miscare);
+					}
+					undoMiscare(miscare,Tabla);
 				}
 			}
-			else
-			{
-				if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
-				{
-					miscariPosibile.add(miscare);
-				}
-			}
-			undoMiscare(miscare,Tabla);
 		}
 	}
 	

@@ -10,8 +10,5 @@ public class Piesa {
 	boolean apar = false; // f-nu e aparat, t-e aparat;
 	ImageIcon img = null;
 	Point imagePosition = new Point();
-	
-	static void ana(){
-		System.out.println("maria");
-	}
+
 }
