@@ -1,9 +1,11 @@
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import java.awt.Point;
+import java.io.IOException;
 
 public class Pion extends Piesa{
 
-	Pion(int cul, int x, int y)
+	Pion(int cul, int x, int y) 
 	{	
 		if(cul > 1)
 		{

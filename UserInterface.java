@@ -3,23 +3,25 @@ import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import java.awt.event.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.awt.*;
 
 public class UserInterface extends JPanel implements Runnable,MouseListener,MouseMotionListener,ActionListener{
 	
 	private static final long serialVersionUID = 1L;
-	int sc=50, xmouse=3, ymouse=3;
+	static int sc=50, xmouse=3, ymouse=3;
 	Image img;
 	static int x,y,x2,y2;
 	static String miscare;
 	static Piesa TablaUI[][] = new Piesa[8][8];
-	static int culoareJucator = 0;
-	static int culoareCalculator = 1;
 	static boolean miscareFacuta;
-	static int nivelDificultate = 4;
 	String St = new String("ABCDEFGH12345678");
-	static int gamemod=0; //(1-pvp+internet, 2-pvp+samepc, 3-pvc+Alb, 4-pvc+Negru)
-	
+	public static int gameMode = 0; //(1-pvp+internet, 2-pvp+samepc, 3-pvc+Alb, 4-pvc+Negru)
+	public boolean totulAles = false;
 	static JPanel 	chatpanel= new JPanel();
 	static JPanel	istoricpanel = new JPanel();
 	static JPanel panel = new JPanel();
@@ -42,6 +44,7 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 	JScrollPane istoric_scrollPane = new JScrollPane();
 	JTextArea istoric_textArea = new JTextArea();
 	Boolean mousePressed = false;
+	Server SV;
 	
 	public void display(){
 
@@ -101,20 +104,29 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
             panel1.repaint();
 		}
 		else if(ev.getSource() == singlepc1){
-			gamemod=1;
-			gameinterface(gamemod);
+                    SV = new Server();
+			gameMode = 1;
+			totulAles = true;
+				gameinterface(gameMode);				
 		}
 		else if(ev.getSource() == singlepc2){
-			gamemod=2;
-			gameinterface(gamemod);
+			gameMode = 2;
+			totulAles = true;
+			gameinterface(gameMode);
 		}
 		else if(ev.getSource() == colorbut1){
-			gamemod=3;
-			optionpane(gamemod);
+			gameMode = 3;
+			totulAles = true;
+			AI.culoareJucator = 0;
+			AI.culoareCalculator = 1;
+			optionpane(gameMode);
 		}
 		else if(ev.getSource() == colorbut2){
-			gamemod=4;
-			optionpane(gamemod);
+			gameMode = 4;
+			AI.culoareJucator = 1;
+			AI.culoareCalculator = 0;
+			totulAles = false;
+			optionpane(gameMode);
 		}
 		else if(ev.getSource() == backbut){
         		panel1.removeAll();
@@ -129,19 +141,21 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		JOptionPane jp = new JOptionPane();
 		String mess = new String("Ce nivel de dificultate alegi?");
 		CheckboxGroup lvl = new CheckboxGroup();
-		Checkbox lvl4 = new Checkbox("Începãtor", lvl, true);
+		Checkbox lvl4 = new Checkbox("Incepator", lvl, true);
 		Checkbox lvl6 = new Checkbox("Mediu",lvl, false);
 		Checkbox lvl8 = new Checkbox("Avansat",lvl, false);
 		Object[] ob =  {mess,lvl4,lvl6,lvl8};
 		int op = JOptionPane.showConfirmDialog(null, ob, "Nivel",JOptionPane.OK_CANCEL_OPTION);
 		if(op == JOptionPane.OK_OPTION){
 			if(lvl.getSelectedCheckbox() == lvl4)
-				nivelDificultate = 4;
+				AI.nivelDificultate = 1;
 			else if(lvl.getSelectedCheckbox() == lvl6)
-				nivelDificultate = 6;
+				AI.nivelDificultate = 3;
 			else if(lvl.getSelectedCheckbox() == lvl8)
-				nivelDificultate = 8;
+				AI.nivelDificultate = 5;
+			totulAles = true;
 			gameinterface(gamemod);
+			
 		}
 	}
 	
@@ -149,10 +163,10 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		jf.getContentPane().removeAll();
 		jf.setLayout(new BorderLayout());	
 		UserInterface t = new UserInterface();
-		t.setPreferredSize(new Dimension(400,400));
+		t.setPreferredSize(new Dimension(450,500));
 		t.setMinimumSize(new Dimension(400,400));	
-		panel.setBounds(100, 100, sc*8+20, sc*8+15);
-		//panel.setPreferredSize(new Dimension(sc*8+20,sc*8+15));	
+		panel.setBounds(100, 100, 460, 435);
+		//panel.setPreferredSize(new Dimension(420,415));	
 		panel.setLayout(new BorderLayout());
 		panel.add(t, BorderLayout.CENTER);	
 		panel.setBackground(Color.LIGHT_GRAY);
@@ -160,8 +174,8 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		jf.setMinimumSize(new Dimension(456, 500));
 		jf.add(panel, BorderLayout.CENTER);
         jf.add(label1, BorderLayout.SOUTH);
-        if(gamemod==1){
-        	jf.setMinimumSize(new Dimension(881, 495));
+        if(gamemod == 1){
+        	jf.setMinimumSize(new Dimension(924, 495));
         	chatpanel.setBackground(Color.ORANGE);
         	istoricpanel.setBackground(Color.BLUE);	
         	chatpanel.setPreferredSize(new Dimension((int)((jf.getWidth()-panel.getWidth())*0.6), jf.getHeight()-20));		
@@ -179,7 +193,7 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		
 		sc = Math.min((int)panel.getSize().getWidth()-40, (int)panel.getSize().getHeight()-35)/8;
 		
-		System.out.println("JF:"+jf.getWidth()+" p1:"+istoricpanel.getWidth()+" p2:"+panel.getWidth()+" p3:"+chatpanel.getWidth()+" sc:"+sc);
+		//System.out.println("JF:"+jf.getWidth()+" p1:"+istoricpanel.getWidth()+" p2:"+panel.getWidth()+" p3:"+chatpanel.getWidth()+" sc:"+sc);
 
 		super.paintComponent(g);
 		this.addMouseListener(this);
@@ -250,8 +264,11 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		istoric_scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 	}
 	
+	
+	
 	UserInterface()
 	{
+		int space;
 		//INITIALIZAM TOTUL CU NULL
 		for(int i=0; i<8; i++)
 		{
@@ -261,39 +278,47 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 			}		
 		}
 		//PLASAM PIONII
+		space = 3;
 		for(int i = 0; i<8; i++)
 		{
-			TablaUI[6][i] = new Pion(0,6*sc+20,i*sc+20);
+			space--;
+			TablaUI[6][i] = new Pion(0,6*sc+14,i*sc+18+space);
 		}
+		space = 5;
 		for(int i = 0; i<8; i++)
 		{
-			TablaUI[1][i] = new Pion(1,1*sc+20,i*sc+20);
+			space--;
+			TablaUI[1][i] = new Pion(1,1*sc+19,i*sc+16+space);
 		}
 		//PLASAM TURNURILE
 		TablaUI[0][0] = new Turn(1,20,20);
-		TablaUI[0][7] = new Turn(1,20,7*sc+20);
-		TablaUI[7][0] = new Turn(0,7*sc+20,20);
-		TablaUI[7][7] = new Turn(0,7*sc+20,7*sc+20);
+		TablaUI[0][7] = new Turn(1,20,7*sc+15);
+		TablaUI[7][0] = new Turn(0,7*sc+13,20);
+		TablaUI[7][7] = new Turn(0,7*sc+13,7*sc+13);
 		//PLASAM CAII
-		TablaUI[0][6] = new Cal(1,20,6*sc+20);
-		TablaUI[0][1] = new Cal(1,20,1*sc+20);
-		TablaUI[7][1] = new Cal(0,7*sc+20,1*sc+20);
-		TablaUI[7][6] = new Cal(0,7*sc+20,6*sc+20);
+		TablaUI[0][6] = new Cal(1,20,6*sc+14);
+		TablaUI[0][1] = new Cal(1,20,1*sc+18);
+		TablaUI[7][1] = new Cal(0,7*sc+13,1*sc+19);
+		TablaUI[7][6] = new Cal(0,7*sc+13,6*sc+14);
 		//PLASAM NEBUNII
-		TablaUI[0][5] = new Nebun(1,20,5*sc+20);
-		TablaUI[0][2] = new Nebun(1,20,2*sc+20);
-		TablaUI[7][5] = new Nebun(0,7*sc+20,5*sc+20);
-		TablaUI[7][2] = new Nebun(0,7*sc+20,2*sc+20);
+		TablaUI[0][5] = new Nebun(1,20,5*sc+15);
+		TablaUI[0][2] = new Nebun(1,20,2*sc+18);
+		TablaUI[7][5] = new Nebun(0,7*sc+13,5*sc+15);
+		TablaUI[7][2] = new Nebun(0,7*sc+13,2*sc+18);
 		//PLASAM REGINELE
-		TablaUI[0][3] = new Regina(1,20,3*sc+20);
-		TablaUI[7][3] = new Regina(0,7*sc+20,3*sc+20);
+		TablaUI[0][3] = new Regina(1,20,3*sc+17);
+		TablaUI[7][3] = new Regina(0,7*sc+13,3*sc+17);
 		//PLASAM REGII
-		TablaUI[0][4] = new Rege(1,20,4*sc+20);
-		TablaUI[7][4] = new Rege(0,7*sc+20,4*sc+20);
+		TablaUI[0][4] = new Rege(1,20,4*sc+17);
+		TablaUI[7][4] = new Rege(0,7*sc+13,4*sc+16);
+		//FACEM SA FIE TOTUL ORDONAT IN PATRAT
+		
+		
 	}
 
 	boolean peTabla(int a, int b, int c, int d)
 	{
+		System.out.println(a+" "+b+" "+c+" "+d);
 		if(0>a||7<a)
 			return false;
 		
@@ -312,8 +337,8 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 	//FUNCTIE PENTRU THREAD
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		
+		while(gameMode == 0)
+			System.out.print(gameMode);
 	}
 
 
@@ -358,7 +383,6 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 	@Override
 	public void mousePressed(MouseEvent e) {
 		mousePressed = true;
-		System.out.println("mousepressed");
 		miscare = "";
 		if(TablaUI[(e.getY()-20)/sc][(e.getX()-20)/sc] != null)
 		{
@@ -368,11 +392,11 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 			y = xmouse;
 			miscare+=x+""+y;
 			TablaUI[(e.getY()-20)/sc][(e.getX()-20)/sc].imagePosition.setLocation(e.getY()-24,e.getX()-24);
-			System.out.println("press:"+(e.getY()-20)/sc+" "+(e.getX()-20)/sc);
+			//System.out.println("press:"+(e.getY()-20)/sc+" "+(e.getX()-20)/sc);
 			//System.out.println("S-a selectat ceva pe pozitia " + x + " " + y );
 			//System.out.println(""+Tabla[e.getY()/sc][e.getX()/sc].getClass().getSimpleName());
 		}
-		repaint();
+		//repaint();
 		
 	}
 
@@ -383,7 +407,7 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		
 		if(TablaUI[ymouse][xmouse] != null && peTabla(ymouse,xmouse,e.getY()-20,e.getX()-20))
 		{
-			System.out.println("release:"+(e.getY()-20)/sc+" "+(e.getX()-20)/sc);
+			//System.out.println("release:"+(e.getY()-20)/sc+" "+(e.getX()-20)/sc);
 			x2 = (e.getY()-20)/sc;
 			y2 = (e.getX()-20)/sc;
 			miscare+=x2+""+y2;
@@ -424,9 +448,9 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 			{
 				if(AI.miscariPosibileNegre.indexOf(miscare) != -1)
 				{
-					miscareFacuta = true;
+					miscareFacuta = true;					
 					AI.doMiscare(miscare,TablaUI);
-					TablaUI[x2][y2].imagePosition.setLocation(x2*sc+20, y2*sc+20);
+					TablaUI[x2][y2].imagePosition.setLocation(x2*sc+20, y2*sc+20);			
 					AI.istoriaMiscarilor.add(miscare);
 					//System.out.println("S-a facut doMiscare");
 				}
@@ -436,9 +460,8 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 					TablaUI[ymouse][xmouse].imagePosition.setLocation(ymouse*sc+20, xmouse*sc+20);
 				}
 			}
-			
 		}
-		
+		//TablaUI[ymouse][xmouse].imagePosition.setLocation(ymouse*sc+20, xmouse*sc+20);
 		repaint();	
 	}
 

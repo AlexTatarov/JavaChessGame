@@ -22,4 +22,3 @@ public class Rege extends Piesa{
 		imagePosition.setLocation(x, y);
 	}	
 }
-
