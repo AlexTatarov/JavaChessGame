@@ -17,49 +17,64 @@ public class AI {
 	static int culoareJucator;
 	
 	
-	void samePC()
+	void samePC(UserInterface ui)
 	{
 		boolean albe,negru;
 		int result = 0;
 		while(result == 0)
 		{
+			ui.jf.repaint();
 			result = playerFaceMiscare(randMiscare);
+			System.out.println("Result este " + result);
 		}
 		//functie care ar afisa invingatorul(randMiscare e culoarea calculatorului);
 		//0 = albe 1 = negre 2 = remiza;
+		if(randMiscare == 0)
+		{
+			ui.anuntCastigator(4);
+		}
+		else if(randMiscare == 1)
+		{
+			ui.anuntCastigator(3);
+		}
+		else
+		{
+			ui.anuntCastigator(1);
+		}
 	}
 	void blackAgainstComputer(UserInterface ui)
 	{
 		int result = 0;
 		while(result == 0)
 		{
-			
-			
 			result = calculatorFaceMiscare(ui);
 			if(result == 1)
 			{
 				System.out.println("Remiza.");
+				ui.anuntCastigator(1);
 				break;
 			}
 			if(result == 2)
 			{
 				System.out.println("Sah. Mat. Calculatorul a castigat.");
+				ui.anuntCastigator(2);
 				break;
 			}
-			
+			ui.jf.repaint();
 			result = playerFaceMiscare(culoareJucator);
 			if(result == 1)
 			{
 				System.out.println("Remiza.");
+				ui.anuntCastigator(1);
 				break;
 			}
 			if(result == 2)
 			{
 				System.out.println("Sah.Mat. Jucatorul a castigat.");
+				ui.anuntCastigator(0);
 				break;
 			}
-			
-			UserInterface.jf.repaint();
+			ui.jf.repaint();
 		}
 	}
 	void whiteAgainstComputer(UserInterface ui)
@@ -67,61 +82,35 @@ public class AI {
 		int result = 0;
 		while(result == 0)
 		{
-			System.out.println("Inainte:");
-			for(int i = 0; i<8; i++)
-			{
-				for(int j=0; j<8; j++)
-				{
-					if(TablaAI[i][j] != null)
-					{
-						System.out.print(TablaAI[i][j].cod+" ");
-					}
-					else
-					{
-						System.out.print("n ");
-					}
-				}
-				System.out.println();
-			}
+			
 			result = playerFaceMiscare(culoareJucator);
 			if(result == 1)
 			{
 				System.out.println("Remiza.");
+				ui.anuntCastigator(1);
 				break;
 			}
 			if(result == 2)
 			{
 				System.out.println("Sah. Mat. Calculatorul a castigat.");
+				ui.anuntCastigator(0);
 				break;
 			}
-			
+			ui.jf.repaint();
 			result = calculatorFaceMiscare(ui);
 			if(result == 1)
 			{
 				System.out.println("Remiza.");
+				ui.anuntCastigator(1);
 				break;
 			}
 			if(result == 2)
 			{
 				System.out.println("Sah.Mat. Jucatorul a castigat.");
+				ui.anuntCastigator(2);
 				break;
 			}
-			System.out.println("Dupa:");
-			for(int i = 0; i<8; i++)
-			{
-				for(int j=0; j<8; j++)
-				{
-					if(TablaAI[i][j] != null)
-					{
-						System.out.print(TablaAI[i][j].cod+" ");
-					}
-					else
-					{
-						System.out.print("n ");
-					}
-				}
-				System.out.println();
-			}
+			
 			UserInterface.jf.repaint();
 		}
 	}
@@ -137,7 +126,8 @@ public class AI {
 		{
 			if(result == 1)
 			{
-				System.out.println("Remiza.");
+				
+				ui.anuntCastigator(1);
 				return 1;
 			}
 			else if(result == 2)
@@ -196,6 +186,12 @@ public class AI {
 		Tabla[x_initial][y_initial].imagePosition.setLocation(x_final*UserInterface.sc+20, y_final*UserInterface.sc+20);
 		Tabla[x_final][y_final] = Tabla[x_initial][y_initial];
 		Tabla[x_initial][y_initial] = null;
+		if(miscare.charAt(5) == 't')
+		{
+			int culoare = Tabla[x_final][y_final].culoare;
+			Tabla[x_final][y_final] = null;
+			Tabla[x_final][y_final] = new Regina(culoare,x_final*UserInterface.sc+20,y_final*UserInterface.sc+20);
+		}
 		
 	}
 	//SE ALEGE MISCAREA PENTRU CALCULATOR, DECI CALCULATORUL VA FI MAXIMAZING PLAYER
@@ -433,7 +429,7 @@ public class AI {
 				{
 					try 
 					{
-						Thread.sleep(1000);
+						Thread.sleep(500);
 					} 
 					catch (InterruptedException e) 
 					{
@@ -464,7 +460,7 @@ public class AI {
 				{
 					try 
 					{
-						Thread.sleep(100);
+						Thread.sleep(500);
 					} 
 					catch (InterruptedException e) 
 					{	
@@ -510,7 +506,7 @@ public class AI {
 		{
 			Tabla[x_initial][y_initial].stare = 2;
 		}
-		if(miscare.charAt(4) != ' ')
+		if(miscare.charAt(4) != ' ' )
 		{
 			if(cul == 0)
 			{
@@ -523,6 +519,12 @@ public class AI {
 		}
 		Tabla[x_final][y_final] = Tabla[x_initial][y_initial];
 		Tabla[x_initial][y_initial] = null;
+		if(miscare.charAt(5) == 't')
+		{
+			int culoare = Tabla[x_final][y_final].culoare;
+			Tabla[x_final][y_final] = null;
+			Tabla[x_final][y_final] = new Regina(culoare,x_final*UserInterface.sc+20,y_final*UserInterface.sc+20);
+		}
 		
 	}
 	
@@ -536,6 +538,12 @@ public class AI {
 		y_initial = Character.getNumericValue(miscare.charAt(1));
 		x_final = Character.getNumericValue(miscare.charAt(2));
 		y_final = Character.getNumericValue(miscare.charAt(3));
+		if(miscare.charAt(5) == 't')
+		{
+			int culoare = Tabla[x_final][y_final].culoare;
+			Tabla[x_final][y_final] = null;
+			Tabla[x_final][y_final] = new Pion(culoare,x_final*UserInterface.sc+20,y_final*UserInterface.sc+20);
+		}
 		if(miscare.charAt(4) != ' ')
 		{
 			if(Tabla[x_final][y_final].culoare == 1)
@@ -734,7 +742,7 @@ public class AI {
 				{
 					if(Tabla[raux][caux] == null)
 					{
-						miscare = ""+r+c+raux+caux+" ";
+						miscare = ""+r+c+raux+caux+"  ";
 						doMiscare(miscare,Tabla);
 						if(regeNeAtacat(raux,caux,Tabla))
 						{
@@ -744,7 +752,7 @@ public class AI {
 					} 
 					else if (Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul)
 					{
-						miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+						miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod+" ";
 						doMiscare(miscare,Tabla);
 						if(regeNeAtacat(raux,caux,Tabla))
 						{
@@ -778,7 +786,7 @@ public class AI {
 					
 					if(Tabla[raux][caux]==null)
 					{
-						miscare = "" + r + c + raux + caux+ " ";
+						miscare = "" + r + c + raux + caux+ "  ";
 						doMiscare(miscare,Tabla);
 						if(cul == 0)
 						{
@@ -798,7 +806,7 @@ public class AI {
 					}
 					else if(Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 					{
-						miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+						miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod+" ";
 						doMiscare(miscare,Tabla);
 						if(cul == 0)
 						{
@@ -848,7 +856,7 @@ public class AI {
 					{
 						if(Tabla[raux][caux] == null)
 						{
-							miscare = ""+r+c+raux+caux+" ";
+							miscare = ""+r+c+raux+caux+"  ";
 							doMiscare(miscare,Tabla);
 							if(cul == 0)
 							{
@@ -868,7 +876,7 @@ public class AI {
 						}
 						else if(Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 						{
-							miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+							miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod+" ";
 							doMiscare(miscare,Tabla);
 							if(cul == 0)
 							{
@@ -907,10 +915,7 @@ public class AI {
 		String miscare = new String();
 		int raux;
 		int caux;
-		if(Tabla[r][c] == null)
-		{
-			System.out.println("Este null1");
-		}
+		
 		//caz 1
 		raux = r - 2;
 		caux = c - 1;
@@ -918,12 +923,12 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
-				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod+" ";
 				posibil = true;
 			}
 			if(posibil)
@@ -957,12 +962,12 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
-				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod+" ";
 				posibil = true;
 			}
 			if(posibil)
@@ -993,13 +998,13 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
 				posibil = true;
-				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod+" ";
 			}
 			if(posibil)
 			{
@@ -1029,12 +1034,12 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
-				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod+" ";
 				posibil = true;
 			}
 			if(posibil)
@@ -1065,12 +1070,12 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
-				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod+" ";
 				posibil = true;
 			}
 			if(posibil)
@@ -1101,12 +1106,12 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
-				miscare = "" + r + c + raux + caux + TablaAI[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + TablaAI[raux][caux].cod+" ";
 				posibil = true;
 			}
 			if(posibil)
@@ -1137,12 +1142,12 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
-				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod+" ";
 				posibil = true;
 			}
 			if(posibil)
@@ -1173,12 +1178,12 @@ public class AI {
 		{
 			if(Tabla[raux][caux] == null)
 			{
-				miscare = "" + r + c + raux + caux + " ";
+				miscare = "" + r + c + raux + caux + "  ";
 				posibil = true;
 			}
 			else if(Tabla[raux][caux] != null && Tabla[raux][caux].culoare != cul && Tabla[raux][caux].cod != 9)
 			{
-				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+				miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod + " ";
 				posibil = true;
 			}
 			if(posibil)
@@ -1220,7 +1225,14 @@ public class AI {
 				//UN PAS INAINTE
 				if(Tabla[raux][c] == null)
 				{
-					miscare = ""+r+c+raux+caux+" ";
+					if(raux == 0)
+					{
+						miscare = ""+r+c+raux+caux+" t";
+					}
+					else
+					{
+						miscare = ""+r+c+raux+caux+"  ";
+					}
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
 					{
@@ -1232,7 +1244,16 @@ public class AI {
 				caux = c + 1;
 				if(caux < 8 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 1 && Tabla[raux][caux].cod != 9)
 				{
+					
 					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					if(raux == 0)
+					{
+						miscare +="t";
+					}
+					else
+					{
+						miscare +=" ";
+					}
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
 					{
@@ -1245,6 +1266,14 @@ public class AI {
 				if(caux > -1 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 1 && Tabla[raux][caux].cod != 9)
 				{
 					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					if(raux == 0)
+					{
+						miscare +="t";
+					}
+					else
+					{
+						miscare +=" ";
+					}
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
 					{
@@ -1253,9 +1282,9 @@ public class AI {
 					undoMiscare(miscare,Tabla);
 				}
 				//SALT INITIAL DE 2 PASI
-				if(Tabla[r][c].stare == 1 && Tabla[r+directie*2][c] == null)
+				if(Tabla[r][c].stare == 1 && r+directie*2 > -1 && Tabla[r+directie*2][c] == null)
 				{
-					miscare = ""+r+c+(r+directie*2)+c+" ";
+					miscare = ""+r+c+(r+directie*2)+c+"  ";
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeAlb,yRegeAlb,Tabla))
 					{
@@ -1276,7 +1305,14 @@ public class AI {
 				//UN PAS INAINTE
 				if(Tabla[raux][caux] == null)
 				{
-					miscare = ""+r+c+raux+caux+" ";
+					if(raux == 7)
+					{
+						miscare = ""+r+c+raux+caux+" t";
+					}
+					else
+					{
+						miscare = ""+r+c+raux+caux+"  ";
+					}
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
 					{
@@ -1288,7 +1324,16 @@ public class AI {
 				caux = c + 1;
 				if(caux < 8 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 0 && Tabla[raux][caux].cod != 9)
 				{
+					
 					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					if(raux == 7)
+					{
+						miscare += "t";
+					}
+					else
+					{
+						miscare += " ";
+					}
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
 					{
@@ -1301,6 +1346,14 @@ public class AI {
 				if(caux > -1 && Tabla[raux][caux] != null && Tabla[raux][caux].culoare == 0 && Tabla[raux][caux].cod != 9)
 				{
 					miscare = ""+r+c+raux+caux+Tabla[raux][caux].cod;
+					if(raux == 7)
+					{
+						miscare += "t";
+					}
+					else
+					{
+						miscare += " ";
+					}
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
 					{
@@ -1309,9 +1362,9 @@ public class AI {
 					undoMiscare(miscare,Tabla);
 				}
 				//SALT INITIAL DE 2 PASI
-				if(Tabla[r][c].stare == 1 && Tabla[r+directie*2][c] == null)
+				if(Tabla[r][c].stare == 1 && r+directie*2 < 8 && Tabla[r+directie*2][c] == null)
 				{
-					miscare = ""+r+c+(r+directie*2)+c+" ";
+					miscare = ""+r+c+(r+directie*2)+c+"  ";
 					doMiscare(miscare,Tabla);
 					if(regeNeAtacat(xRegeNegru,yRegeNegru,Tabla))
 					{
@@ -1343,7 +1396,7 @@ public class AI {
 						
 						if(Tabla[raux][caux] == null)
 						{
-							miscare = "" + r + c + raux + caux + " ";
+							miscare = "" + r + c + raux + caux + "  ";
 							doMiscare(miscare,Tabla);
 							if(cul == 0)
 							{
@@ -1364,7 +1417,7 @@ public class AI {
 						}
 						else if(Tabla[raux][caux].culoare != Tabla[r][c].culoare && Tabla[raux][caux].cod != 9)
 						{
-							miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod;
+							miscare = "" + r + c + raux + caux + Tabla[raux][caux].cod+" ";
 							doMiscare(miscare,Tabla);
 							if(cul == 0)
 							{

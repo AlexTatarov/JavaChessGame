@@ -12,11 +12,11 @@ public class Cal extends Piesa{
 		cod = 3; 
 		if(cul == 1)
 		{
-			img = new ImageIcon("bcal.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("bcal.png"));
 		}
 		else
 		{
-			img = new ImageIcon("acal.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("acal.png"));
 		}
 		imagePosition.setLocation(x, y);
 	}

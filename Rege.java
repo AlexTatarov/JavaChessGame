@@ -13,11 +13,11 @@ public class Rege extends Piesa{
 		stare = 1;
 		if(cul == 1)
 		{
-			img = new ImageIcon("brege.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("brege.png"));
 		}
 		else
 		{
-			img = new ImageIcon("arege.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("arege.png"));
 		}
 		imagePosition.setLocation(x, y);
 	}	

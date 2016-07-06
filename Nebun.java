@@ -12,11 +12,11 @@ public class Nebun extends Piesa{
 		cod = 2; 
 		if(cul == 1)
 		{
-			img = new ImageIcon("bnebun.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("bnebun.png"));
 		}
 		else
 		{
-			img = new ImageIcon("anebun.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("anebun.png"));
 		}
 		imagePosition.setLocation(x, y);
 	}

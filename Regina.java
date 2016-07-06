@@ -12,11 +12,11 @@ public class Regina extends Piesa{
 		cod = 8;
 		if(cul == 1)
 		{
-			img = new ImageIcon("bregina.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("bregina.png"));
 		}
 		else
 		{
-			img = new ImageIcon("aregina.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("aregina.png"));
 		}
 		imagePosition.setLocation(x, y);
 	}

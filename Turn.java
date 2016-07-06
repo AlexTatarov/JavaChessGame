@@ -13,11 +13,11 @@ public class Turn extends Piesa{
 		stare = 1;
 		if(cul == 1)
 		{
-			img = new ImageIcon("bturn.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("bturn.png"));
 		}
 		else
 		{
-			img = new ImageIcon("aturn.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("aturn.png"));
 		}
 		imagePosition.setLocation(x, y);
 	}
