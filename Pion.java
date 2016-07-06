@@ -16,11 +16,11 @@ public class Pion extends Piesa{
 		cod = 1; 
 		if(cul == 1)
 		{
-			img = new ImageIcon("bpion.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("bpion.png"));
 		}
 		else
 		{
-			img = new ImageIcon("apion.png");
+			img = new ImageIcon(getClass().getClassLoader().getResource("apion.png"));
 		}
 		imagePosition.setLocation(x, y);
 	}

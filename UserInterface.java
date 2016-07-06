@@ -17,9 +17,11 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 	Image img;
 	static int x,y,x2,y2;
 	static String miscare;
+	static int tempsc=50;
 	static Piesa TablaUI[][] = new Piesa[8][8];
 	static boolean miscareFacuta;
 	String St = new String("ABCDEFGH12345678");
+	static boolean functieTerminata = false;
 	public static int gameMode = 0; //(1-pvp+internet, 2-pvp+samepc, 3-pvc+Alb, 4-pvc+Negru)
 	public boolean totulAles = false;
 	static JPanel 	chatpanel= new JPanel();
@@ -68,6 +70,7 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
         panel1.add(pvpbut2);
         jf.add(panel1);
         
+        
         pvpbut1.setFont(new Font("Arial", Font.PLAIN, 25));
         pvpbut2.setFont(new Font("Arial", Font.PLAIN, 25));
         colorbut1.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -82,6 +85,43 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
         singlepc1.addActionListener(this);
         singlepc2.addActionListener(this);      
         backbut.addActionListener(this);
+	}
+	int promovarePion(){
+		JOptionPane jp = new JOptionPane();
+		String mess = new String("Pionul se va transforma in:");
+		CheckboxGroup grp = new CheckboxGroup();
+		Checkbox c1 = new Checkbox("Regina", grp, true);
+		Checkbox c2 = new Checkbox("Turn", grp, false);
+		Checkbox c3 = new Checkbox("Nebun",grp, false);
+		Checkbox c4 = new Checkbox("Cal",grp, false);
+		Object[] ob =  {mess,c1,c2,c3,c4};
+		int op = JOptionPane.showConfirmDialog(null, ob, "Evolutie",JOptionPane.OK_CANCEL_OPTION);
+		if(op == JOptionPane.OK_OPTION){
+			if(grp.getSelectedCheckbox() == c1)
+				 return 8;
+			else if(grp.getSelectedCheckbox() == c2)
+				 return 5;
+			else if(grp.getSelectedCheckbox() == c3)
+				 return 2;
+			else if(grp.getSelectedCheckbox() == c2)
+				 return 3;
+		}
+		return 0;
+	}
+	
+	void anuntCastigator(int castig){
+		String mess = null;
+		if(castig == 0)
+			mess = new String("AI PIERDUT!");
+		else if (castig == 1)
+			mess = new String("REMIZA!");
+		else if (castig == 2)
+			mess = new String("AI CASTIGAT!");
+		else if (castig == 3)
+			mess = new String("AU CASTIGAT ALBELE!");
+		else if (castig == 4)
+			mess = new String("AU CASTIGAT NEGRELE!");
+		JOptionPane.showMessageDialog(null, mess);
 	}
 	
 	@Override
@@ -150,9 +190,9 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 			if(lvl.getSelectedCheckbox() == lvl4)
 				AI.nivelDificultate = 1;
 			else if(lvl.getSelectedCheckbox() == lvl6)
-				AI.nivelDificultate = 3;
+				AI.nivelDificultate = 2;
 			else if(lvl.getSelectedCheckbox() == lvl8)
-				AI.nivelDificultate = 5;
+				AI.nivelDificultate = 4;
 			totulAles = true;
 			gameinterface(gamemod);
 			
@@ -190,10 +230,7 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 	
 	public void paintComponent(Graphics g)
 	{
-		
 		sc = Math.min((int)panel.getSize().getWidth()-40, (int)panel.getSize().getHeight()-35)/8;
-		
-		//System.out.println("JF:"+jf.getWidth()+" p1:"+istoricpanel.getWidth()+" p2:"+panel.getWidth()+" p3:"+chatpanel.getWidth()+" sc:"+sc);
 
 		super.paintComponent(g);
 		this.addMouseListener(this);
@@ -236,9 +273,14 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		for(int i=0; i<8; i++)
 			for(int j=0; j<8; j++)
 				if(TablaUI[i][j] != null){
+					if(sc!=tempsc){
+						TablaUI[i][j].imagePosition.setLocation(i*sc+20, j*sc+20);
+					}
 					g.drawImage(img = TablaUI[i][j].img.getImage() ,TablaUI[i][j].imagePosition.y  ,TablaUI[i][j].imagePosition.x , sc, sc, null);
+					
 				}
-		
+		tempsc=sc;
+		System.out.println(sc+","+ tempsc);
 	}
 	
 	void chat(){		
@@ -278,39 +320,35 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 			}		
 		}
 		//PLASAM PIONII
-		space = 3;
 		for(int i = 0; i<8; i++)
 		{
-			space--;
-			TablaUI[6][i] = new Pion(0,6*sc+14,i*sc+18+space);
+			TablaUI[6][i] = new Pion(0,6*sc+20,i*sc+20);
 		}
-		space = 5;
 		for(int i = 0; i<8; i++)
 		{
-			space--;
-			TablaUI[1][i] = new Pion(1,1*sc+19,i*sc+16+space);
+			TablaUI[1][i] = new Pion(1,1*sc+20,i*sc+20);
 		}
 		//PLASAM TURNURILE
 		TablaUI[0][0] = new Turn(1,20,20);
-		TablaUI[0][7] = new Turn(1,20,7*sc+15);
-		TablaUI[7][0] = new Turn(0,7*sc+13,20);
-		TablaUI[7][7] = new Turn(0,7*sc+13,7*sc+13);
+		TablaUI[0][7] = new Turn(1,20,7*sc+20);
+		TablaUI[7][0] = new Turn(0,7*sc+20,20);
+		TablaUI[7][7] = new Turn(0,7*sc+20,7*sc+20);
 		//PLASAM CAII
-		TablaUI[0][6] = new Cal(1,20,6*sc+14);
-		TablaUI[0][1] = new Cal(1,20,1*sc+18);
-		TablaUI[7][1] = new Cal(0,7*sc+13,1*sc+19);
-		TablaUI[7][6] = new Cal(0,7*sc+13,6*sc+14);
+		TablaUI[0][6] = new Cal(1,20,6*sc+20);
+		TablaUI[0][1] = new Cal(1,20,1*sc+20);
+		TablaUI[7][1] = new Cal(0,7*sc+20,1*sc+20);
+		TablaUI[7][6] = new Cal(0,7*sc+20,6*sc+20);
 		//PLASAM NEBUNII
-		TablaUI[0][5] = new Nebun(1,20,5*sc+15);
-		TablaUI[0][2] = new Nebun(1,20,2*sc+18);
-		TablaUI[7][5] = new Nebun(0,7*sc+13,5*sc+15);
-		TablaUI[7][2] = new Nebun(0,7*sc+13,2*sc+18);
+		TablaUI[0][5] = new Nebun(1,20,5*sc+20);
+		TablaUI[0][2] = new Nebun(1,20,2*sc+20);
+		TablaUI[7][5] = new Nebun(0,7*sc+20,5*sc+20);
+		TablaUI[7][2] = new Nebun(0,7*sc+20,2*sc+20);
 		//PLASAM REGINELE
-		TablaUI[0][3] = new Regina(1,20,3*sc+17);
-		TablaUI[7][3] = new Regina(0,7*sc+13,3*sc+17);
+		TablaUI[0][3] = new Regina(1,20,3*sc+20);
+		TablaUI[7][3] = new Regina(0,7*sc+20,3*sc+20);
 		//PLASAM REGII
-		TablaUI[0][4] = new Rege(1,20,4*sc+17);
-		TablaUI[7][4] = new Rege(0,7*sc+13,4*sc+16);
+		TablaUI[0][4] = new Rege(1,20,4*sc+20);
+		TablaUI[7][4] = new Rege(0,7*sc+20,4*sc+20);
 		//FACEM SA FIE TOTUL ORDONAT IN PATRAT
 		
 		
@@ -325,10 +363,10 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 		else if(0>b||7<b)
 			return false;
 		
-		else if(0>c||401<c)
+		else if(0>c||jf.getHeight()<c)
 			return false;
 		
-		else if(0>d||401<d)
+		else if(0>d||jf.getWidth()<d)
 			return false;
 		
 		else return true;
@@ -392,26 +430,25 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 			y = xmouse;
 			miscare+=x+""+y;
 			TablaUI[(e.getY()-20)/sc][(e.getX()-20)/sc].imagePosition.setLocation(e.getY()-24,e.getX()-24);
-			//System.out.println("press:"+(e.getY()-20)/sc+" "+(e.getX()-20)/sc);
-			//System.out.println("S-a selectat ceva pe pozitia " + x + " " + y );
-			//System.out.println(""+Tabla[e.getY()/sc][e.getX()/sc].getClass().getSimpleName());
 		}
-		//repaint();
-		
 	}
 
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		mousePressed = false;
-		
+		int x1,y1;
+		functieTerminata = false;
+		System.out.println("release:"+(e.getY()-20)/sc+" "+(e.getX()-20)/sc);
+		System.out.println(jf.getHeight()+" "+jf.getWidth());
 		if(TablaUI[ymouse][xmouse] != null && peTabla(ymouse,xmouse,e.getY()-20,e.getX()-20))
 		{
-			//System.out.println("release:"+(e.getY()-20)/sc+" "+(e.getX()-20)/sc);
+			System.out.println("S-a intrat in if");
 			x2 = (e.getY()-20)/sc;
 			y2 = (e.getX()-20)/sc;
 			miscare+=x2+""+y2;
-			
+			x1 = miscare.charAt(0)-48;
+			y1 = miscare.charAt(1)-48;
 			if(TablaUI[x2][y2] == null)
 			{
 				miscare += " ";
@@ -421,24 +458,82 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 				miscare += TablaUI[x2][y2].cod;
 			}
 			
-			System.out.println("S-a generat miscarea "+miscare);
-			
-			for(int i = 0; i<AI.miscariPosibileAlbe.size(); i++)
+			if(TablaUI[x1][y1].cod == 1)
 			{
-				//System.out.println(AI.miscariPosibileAlbe.get(i));
-			}
-			
-			if(AI.randMiscare == 0)
-			{
-				if(AI.miscariPosibileAlbe.indexOf(miscare) != -1)
+				if(TablaUI[x1][y1].culoare == 0 && x2 == 0)
 				{
-					miscareFacuta = true;
-					AI.doMiscare(miscare,TablaUI);
-					TablaUI[x2][y2].imagePosition.setLocation(x2*sc+20, y2*sc+20);
-					AI.istoriaMiscarilor.add(miscare);
-					//System.out.println("S-a facut doMiscare");
+					miscare += "t";
+				}
+				else if(TablaUI[x1][y1].culoare == 1 && x2 == 7)
+				{
+					miscare+= "t";
 				}
 				else
+				{
+					miscare += " ";
+				}
+			}
+			else
+			{
+				miscare += " ";
+			}
+			System.out.println(x1 + " " + y1);
+			System.out.println("S-a generat miscarea "+miscare);
+			
+			if(miscare.charAt(0) == miscare.charAt(2) && miscare.charAt(1) == miscare.charAt(3))
+			{
+				System.out.println("Miscare imposibila");
+				TablaUI[ymouse][xmouse].imagePosition.setLocation(ymouse*sc+20, xmouse*sc+20);
+			}
+			if(AI.randMiscare == 0)
+			{
+				for(int i=0; i<AI.miscariPosibileAlbe.size(); i++)
+				{
+					if(miscare.equals(AI.miscariPosibileAlbe.get(i)))
+					{
+						if(miscare.charAt(5) == 't')
+						{
+							TablaUI[x2][y2] = null;
+							TablaUI[x1][y1] = null;
+							int rez = promovarePion();
+							if(rez == 8)
+							{
+								TablaUI[x2][y2] = new Regina(0,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							else if(rez == 5)
+							{
+								TablaUI[x2][y2] = new Turn(0,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							else if(rez == 2)
+							{
+								TablaUI[x2][y2] = new Nebun(0,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							else if(rez == 3)
+							{
+								TablaUI[x2][y2] = new Cal(0,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							TablaUI[x1][y1] = null;
+						}
+						miscareFacuta = true;
+						AI.doMiscare(miscare,TablaUI);
+						TablaUI[x2][y2].imagePosition.setLocation(x2*sc+20, y2*sc+20);
+						AI.istoriaMiscarilor.add(miscare);
+						break;
+					}
+				}
+				if(miscareFacuta == false)
 				{
 					System.out.println("Miscare imposibila");
 					TablaUI[ymouse][xmouse].imagePosition.setLocation(ymouse*sc+20, xmouse*sc+20);
@@ -446,22 +541,60 @@ public class UserInterface extends JPanel implements Runnable,MouseListener,Mous
 			}
 			else
 			{
-				if(AI.miscariPosibileNegre.indexOf(miscare) != -1)
+				for(int i=0; i<AI.miscariPosibileNegre.size(); i++)
 				{
-					miscareFacuta = true;					
-					AI.doMiscare(miscare,TablaUI);
-					TablaUI[x2][y2].imagePosition.setLocation(x2*sc+20, y2*sc+20);			
-					AI.istoriaMiscarilor.add(miscare);
-					//System.out.println("S-a facut doMiscare");
+					if(miscare.equals(AI.miscariPosibileNegre.get(i)))
+					{
+						if(miscare.charAt(5) == 't')
+						{
+							TablaUI[x2][y2] = null;
+							TablaUI[x1][y1] = null;
+							int rez = promovarePion();
+							if(rez == 8)
+							{
+								TablaUI[x2][y2] = new Regina(1,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							else if(rez == 5)
+							{
+								TablaUI[x2][y2] = new Turn(1,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							else if(rez == 2)
+							{
+								TablaUI[x2][y2] = new Nebun(1,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							else if(rez == 3)
+							{
+								TablaUI[x2][y2] = new Cal(1,x2*sc+20,y2*sc+20);
+								AI.istoriaMiscarilor.add(miscare);
+								miscareFacuta = true;
+								break;
+							}
+							TablaUI[x1][y1] = null;
+						}
+						miscareFacuta = true;
+						AI.doMiscare(miscare,TablaUI);
+						TablaUI[x2][y2].imagePosition.setLocation(x2*sc+20, y2*sc+20);
+						AI.istoriaMiscarilor.add(miscare);
+						break;
+					}
 				}
-				else
+				if(miscareFacuta == false)
 				{
 					System.out.println("Miscare imposibila");
 					TablaUI[ymouse][xmouse].imagePosition.setLocation(ymouse*sc+20, xmouse*sc+20);
 				}
 			}
 		}
-		//TablaUI[ymouse][xmouse].imagePosition.setLocation(ymouse*sc+20, xmouse*sc+20);
+		functieTerminata = true;
 		repaint();	
 	}
 

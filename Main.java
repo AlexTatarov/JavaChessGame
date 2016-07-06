@@ -31,7 +31,7 @@ public class Main {
         	System.out.println("Game initializing...");
         	System.out.println("White - Player1");
         	System.out.println("Black  - Player2");
-        	ai.samePC();
+        	ai.samePC(ui);
         	System.out.println("Game ended");
     	}
         else if(ui.gameMode==1)
@@ -40,6 +40,7 @@ public class Main {
         	albe = 0;
                 negre = 0;
                 if(ui.SV.ss!=null){
+                    ai.randMiscare = 0;
                     albe = ai.playerFaceMiscare(0);
                     ui.SV.sendMove(ai.istoriaMiscarilor.get(ai.istoriaMiscarilor.size()-1));
                 }else{
@@ -54,25 +55,39 @@ public class Main {
         			y = Character.getNumericValue(move.charAt(3));
         			ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
                                 ui.jf.repaint();
+                                ai.randMiscare = 0;
         			albe = ai.playerFaceMiscare(0);
         			ui.SV.sendMove(ai.istoriaMiscarilor.get(ai.istoriaMiscarilor.size()-1));
         		}else {
                                 System.out.println("socket");
                                 move = ui.SV.getMove();
+                                System.out.println("move"+move);
         			AI.doMiscare(move,UserInterface.TablaUI);
                                 x = Character.getNumericValue(move.charAt(2));
         			y = Character.getNumericValue(move.charAt(3));
         			ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
                                 ui.jf.repaint();
-        			negre = ai.playerFaceMiscare(0);
+                                ai.randMiscare = 1;
+        			negre = ai.playerFaceMiscare(1);
                                 System.out.println("cica s-a facut negrele");
         			ui.SV.sendMove(ai.istoriaMiscarilor.get(ai.istoriaMiscarilor.size()-1));
                                 x = Character.getNumericValue(move.charAt(2));
         			y = Character.getNumericValue(move.charAt(3));
         			ui.TablaUI[x][y].imagePosition.setLocation(x*ui.sc+20, y*ui.sc+20);
+                                
                                 ui.jf.repaint();
         		}        		
         	}
+                if(ai.randMiscare == 0 || ai.randMiscare == 1)
+		{
+                    if(ui.SV.ss != null)
+			ui.anuntCastigator(ai.randMiscare);
+                    else ui.anuntCastigator(1-ai.randMiscare);
+		}
+		else
+		{
+			ui.anuntCastigator(1);
+		}
     	}
         else if(ui.gameMode == 3)
         {
